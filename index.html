@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>之之宝宝 · 专属育儿工作台</title>
+
+<!-- PWA 配置 -->
+<link rel="manifest" href="manifest.json">
+
+<!-- iOS 专用配置（让 iPhone Safari 添加到主屏幕后变成全屏 App） -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="之之宝宝">
+<meta name="theme-color" content="#E8A87C">
+
+<!-- iOS 图标（各尺寸覆盖 iPhone/iPad） -->
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="57x57" href="icon-57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="icon-60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="icon-72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="icon-76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="icon-114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="icon-120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="icon-144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icon-152.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icon-167.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="shortcut icon" href="favicon-32.png">
+
+<style>
+:root{
+  --bg:#FBF7F0; --card:#FFFFFF; --sidebar:#F5EDE0; --primary:#E8A87C; --primary-dark:#D4896A;
+  --accent:#85B79D; --accent-soft:#D4E9DD; --pink:#F4C2C2; --blue:#A8C8E1; --yellow:#F5D89E;
+  --text:#4A3728; --text-light:#8A7460; --border:#E8DCC8; --radius:16px; --shadow:0 2px 12px rgba(180,150,110,.12);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei","Noto Color Emoji",sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:var(--primary);border-radius:3px}::-webkit-scrollbar-track{background:transparent}
+
+/* 初始弹窗 */
+#initModal{position:fixed;inset:0;background:rgba(74,55,40,.5);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(4px)}
+#initModal .box{background:var(--card);border-radius:24px;padding:40px 36px;width:400px;max-width:90vw;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.2)}
+#initModal h2{color:var(--primary-dark);font-size:22px;margin-bottom:8px}
+#initModal p{color:var(--text-light);font-size:14px;margin-bottom:24px}
+#initModal input{width:100%;padding:12px 16px;border:2px solid var(--border);border-radius:12px;font-size:16px;text-align:center;color:var(--text);margin-bottom:16px;outline:none}
+#initModal input:focus{border-color:var(--primary)}
+#initModal button{width:100%;padding:14px;border:none;border-radius:12px;background:var(--primary);color:#fff;font-size:16px;font-weight:600;cursor:pointer;transition:.2s}
+#initModal button:hover{background:var(--primary-dark);transform:translateY(-1px)}
+.init-icon{font-size:48px;margin-bottom:12px}
+
+/* 顶部信息栏 */
+.topbar{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#F5EDE0,#FBF7F0);border-bottom:2px solid var(--border);padding:12px 24px;padding-top:calc(12px + env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-shadow:0 2px 8px rgba(180,150,110,.08)}
+.topbar .baby-info{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.topbar .avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--pink));display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.topbar .title{font-size:18px;font-weight:700;color:var(--text)}
+.topbar .meta{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--text-light)}
+.topbar .meta span{background:var(--card);padding:4px 12px;border-radius:20px;border:1px solid var(--border)}
+.topbar .meta b{color:var(--primary-dark)}
+.topbar .actions{display:flex;gap:8px}
+.topbar .actions button{padding:6px 14px;border:1px solid var(--border);border-radius:20px;background:var(--card);color:var(--text-light);font-size:12px;cursor:pointer;transition:.2s;white-space:nowrap}
+.topbar .actions button:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* 布局 */
+.layout{display:flex;min-height:calc(100vh - 73px)}
+.sidebar{width:220px;background:var(--sidebar);padding:20px 12px;padding-bottom:calc(20px + env(safe-area-inset-bottom));flex-shrink:0;position:sticky;top:73px;align-self:flex-start;height:calc(100vh - 73px);overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;cursor:pointer;color:var(--text-light);font-size:14px;font-weight:500;transition:.2s;margin-bottom:4px}
+.nav-item:hover{background:var(--card);color:var(--text)}
+.nav-item.active{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(232,168,124,.4)}
+.nav-icon{font-family:"Noto Color Emoji",-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;font-size:20px;flex-shrink:0}
+.content{flex:1;padding:24px;overflow-x:hidden}
+.section{display:none;animation:fade .3s ease}
+.section.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* 卡片 */
+.card{background:var(--card);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.card h3{font-size:16px;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card h3 .emoji{font-family:"Noto Color Emoji",-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;font-size:20px}
+.tag{display:inline-block;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:600;margin:2px}
+.tag-green{background:var(--accent-soft);color:#5A9A78}
+.tag-orange{background:#FBE7D8;color:#C9783A}
+.tag-blue{background:#D9E8F5;color:#5A87B0}
+.tag-pink{background:#F8DEDE;color:#C76B6B}
+.tag-yellow{background:#FDF0D9;color:#B8902E}
+
+/* 辅食 */
+.meal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.meal-card{background:var(--bg);border-radius:12px;padding:14px;border-left:4px solid var(--primary)}
+.meal-card .time{font-size:12px;color:var(--text-light);font-weight:600}
+.meal-card .food{font-size:14px;font-weight:600;color:var(--text);margin:4px 0}
+.meal-card .desc{font-size:12px;color:var(--texture,#888)}
+.allergen-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.warning-box{background:#FFF5F0;border:1px solid #FFD9C4;border-radius:10px;padding:12px;margin-top:12px;font-size:13px;color:#C45A28}
+
+/* 早教 */
+.game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.game-card{background:var(--bg);border-radius:14px;padding:16px;border-top:4px solid var(--accent)}
+.game-card.motor{border-top-color:var(--primary)}
+.game-card.fine{border-top-color:var(--accent)}
+.game-card.logic{border-top-color:var(--blue)}
+.game-card.music{border-top-color:var(--pink)}
+.game-card .gtitle{font-weight:700;font-size:14px;margin-bottom:6px}
+.game-card .gsteps{font-size:12px;color:var(--text-light);margin:6px 0}
+.game-card .gsteps li{margin:2px 0}
+.game-card .gtags{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.game-card .gsafe{font-size:12px;color:#C45A28;background:#FFF5F0;padding:6px 8px;border-radius:6px;margin-top:6px}
+.game-cat-header{font-size:16px;font-weight:700;margin:16px 0 10px;color:var(--text);display:flex;align-items:center;gap:8px}
+
+/* 育儿知识 */
+.know-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.know-item{background:var(--bg);border-radius:12px;padding:14px}
+.know-item h4{font-size:14px;color:var(--primary-dark);margin-bottom:6px}
+.know-item p{font-size:13px;color:var(--text-light)}
+
+/* 打卡面板 */
+.checklist{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-top:10px}
+.check-item{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg);border-radius:10px;font-size:13px;cursor:pointer;user-select:none;transition:.2s}
+.check-item:hover{background:var(--accent-soft)}
+.check-item input{accent-color:var(--primary);width:18px;height:18px}
+.check-item.checked{background:var(--accent-soft);text-decoration:line-through;color:var(--text-light)}
+.dairy-input{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.dairy-input input{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none}
+.dairy-input button{padding:8px 16px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer}
+.dairy-input button:hover{background:var(--primary-dark)}
+.milk-log{margin-top:12px}
+.milk-log table{width:100%;border-collapse:collapse;font-size:13px}
+.milk-log th,.milk-log td{padding:8px;border-bottom:1px solid var(--border);text-align:left}
+.milk-log th{color:var(--text-light);font-weight:600}
+.milk-log .del{color:#C76B6B;cursor:pointer;border:none;background:none;font-size:14px}
+
+/* 疫苗 */
+.vaccine-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
+.vaccine-table th,.vaccine-table td{padding:10px;border:1px solid var(--border);text-align:left}
+.vaccine-table th{background:var(--sidebar);font-weight:600;color:var(--text)}
+.vaccine-table .done{color:var(--accent);font-weight:600}
+.vaccine-table .upcoming{color:var(--primary-dark);font-weight:600}
+.vaccine-table .overdue{color:#C45A28;font-weight:600}
+.vaccine-table .action{cursor:pointer;font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--card);transition:.2s}
+.vaccine-table .action:hover{background:var(--accent);color:#fff}
+.vaccine-table input,.vaccine-table select{padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;outline:none}
+
+/* 通用按钮 */
+.btn{padding:8px 18px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-size:13px;cursor:pointer;transition:.2s;font-weight:500}
+.btn:hover{background:var(--primary-dark);transform:translateY(-1px)}
+.btn-soft{background:var(--card);color:var(--text);border:1px solid var(--border)}
+.btn-soft:hover{background:var(--sidebar);transform:none}
+.btn-accent{background:var(--accent)}
+.btn-accent:hover{background:#6FA888}
+.btn-sm{padding:5px 12px;font-size:12px;border-radius:8px}
+.btn-group{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+
+/* 提示 */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;padding:10px 24px;border-radius:24px;font-size:14px;z-index:9999;opacity:0;transition:.3s}
+.toast.show{opacity:1;bottom:40px}
+
+.info-banner{background:linear-gradient(135deg,var(--accent-soft),#E8F0EA);border-radius:12px;padding:16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;font-size:14px;color:#5A7A68}
+
+.month-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--primary),var(--pink));color:#fff;padding:6px 16px;border-radius:20px;font-size:14px;font-weight:600;margin-bottom:16px}
+
+.divider{height:1px;background:var(--border);margin:14px 0}
+
+@media(max-width:768px){
+  .sidebar{display:none}
+  .sidebar.mobile-show{display:block;position:fixed;top:73px;left:0;right:0;height:auto;z-index:200}
+  .topbar .meta{font-size:11px}
+  .content{padding:14px}
+}
+</style>
+</head>
+<body>
+
+<!-- 初始弹窗 -->
+<div id="initModal">
+  <div class="box">
+    <div class="init-icon">👶</div>
+    <h2>之之宝宝 · 育儿工作台</h2>
+    <p>请输入之之宝宝的出生日期<br>系统将自动匹配月龄方案</p>
+    <input type="date" id="birthInput" value="">
+    <button onclick="saveBirthDate()">开始记录 ✨</button>
+  </div>
+</div>
+
+<!-- 顶部信息栏 -->
+<div class="topbar">
+  <div class="baby-info">
+    <div class="avatar">👶</div>
+    <div>
+      <div class="title">之之宝宝</div>
+      <div class="meta" id="topMeta">
+        <span>出生日期：<b id="topBirth">—</b></span>
+        <span>来到地球第 <b id="topDays">—</b> 天</span>
+        <span>当前月龄：<b id="topMonthAge">—</b></span>
+      </div>
+    </div>
+  </div>
+  <div class="actions">
+    <button onclick="openDateModal()">📅 修改出生日期</button>
+    <button onclick="exportDayRecord()">📤 导出当日喂养记录</button>
+    <button onclick="exportVaccineRecord()">📋 导出疫苗清单</button>
+    <button onclick="resetDailyData()">🔄 每日数据重置</button>
+  </div>
+</div>
+
+<!-- 布局 -->
+<div class="layout">
+  <div class="sidebar" id="sidebar">
+    <div class="nav-item active" data-sec="food" onclick="switchSection('food')"><span class="nav-icon">🍲</span>每日辅食菜谱</div>
+    <div class="nav-item" data-sec="edu" onclick="switchSection('edu')"><span class="nav-icon">🎮</span>在家早教游戏</div>
+    <div class="nav-item" data-sec="knowledge" onclick="switchSection('knowledge')"><span class="nav-icon">📚</span>对应月龄育儿知识</div>
+    <div class="nav-item" data-sec="nutrition" onclick="switchSection('nutrition')"><span class="nav-icon">🥗</span>每日营养食物打卡</div>
+    <div class="nav-item" data-sec="milk" onclick="switchSection('milk')"><span class="nav-icon">🍼</span>喝奶作息时间表</div>
+    <div class="nav-item" data-sec="vaccine" onclick="switchSection('vaccine')"><span class="nav-icon">💉</span>疫苗接种台账</div>
+  </div>
+
+  <div class="content">
+
+    <!-- 1. 每日辅食菜谱 -->
+    <div class="section active" id="sec-food">
+      <div class="month-badge" id="foodMonthBadge">辅食方案</div>
+
+      <div class="card">
+        <h3><span class="emoji">📋</span>食物性状指导</h3>
+        <div id="foodTexture"></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="emoji">🍚</span>一日搭配方案</h3>
+        <div class="meal-grid" id="mealPlan"></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="emoji">🆕</span>本月新食材添加顺序</h3>
+        <div id="newFoodOrder"></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="emoji">⚠️</span>过敏观察提示</h3>
+        <div id="allergyTip"></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="emoji">🚫</span>本月龄忌口食材</h3>
+        <div id="forbiddenFood"></div>
+      </div>
+    </div>
+
+    <!-- 2. 在家早教游戏 -->
+    <div class="section" id="sec-edu">
+      <div class="month-badge" id="eduMonthBadge">早教游戏</div>
+
+      <div class="game-cat-header">🏃 大运动游戏</div>
+      <div class="game-grid" id="gameMotor"></div>
+
+      <div class="game-cat-header">✋ 精细动作游戏</div>
+      <div class="game-grid" id="gameFine"></div>
+
+      <div class="game-cat-header">🧩 逻辑感知游戏</div>
+      <div class="game-grid" id="gameLogic"></div>
+
+      <div class="game-cat-header">🎵 音乐感官游戏</div>
+      <div class="game-grid" id="gameMusic"></div>
+    </div>
+
+    <!-- 3. 对应月龄育儿知识 -->
+    <div class="section" id="sec-knowledge">
+      <div class="month-badge" id="knowMonthBadge">育儿知识</div>
+
+      <div class="card">
+        <h3><span class="emoji">📏</span>生长指标参考</h3>
+        <div class="know-grid" id="growthData"></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="emoji">😴</span>睡眠特点</h3>
+        <div id="sleepData"></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="emoji">🍼</span>喂养重点</h3>
+        <div id="feedFocus"></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="emoji">❓</span>常见问题</h3>
+        <div class="know-grid" id="commonIssues"></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="emoji">🧴</span>日常护理方案</h3>
+        <div id="dailyCare"></div>
+      </div>
+    </div>
+
+    <!-- 4. 每日营养食物打卡 -->
+    <div class="section" id="sec-nutrition">
+      <div class="month-badge" id="nutritionBadge">营养打卡</div>
+
+      <div class="info-banner" id="nutritionRef">
+        <span>📊</span><span>加载中...</span>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-sm" onclick="exportDayRecord()">📤 导出当日记录</button>
+        <button class="btn btn-soft btn-sm" onclick="resetDailyData()">🔄 重置打卡</button>
+      </div>
+
+      <div class="card">
+        <h3><span class="emoji">🥬</span>蔬菜</h3>
+        <div class="checklist" id="check-veg"></div>
+      </div>
+      <div class="card">
+        <h3><span class="emoji">🍎</span>水果</h3>
+        <div class="checklist" id="check-fruit"></div>
+      </div>
+      <div class="card">
+        <h3><span class="emoji">🍚</span>主食</h3>
+        <div class="checklist" id="check-grain"></div>
+      </div>
+      <div class="card">
+        <h3><span class="emoji">🥚</span>优质蛋白</h3>
+        <div class="checklist" id="check-protein"></div>
+      </div>
+      <div class="card">
+        <h3><span class="emoji">🥛</span>奶量记录</h3>
+        <div class="dairy-input">
+          <input type="time" id="milkTime">
+          <input type="number" id="milkAmount" placeholder="奶量(ml)" style="width:100px">
+          <button onclick="addMilkRecord()">添加记录</button>
+        </div>
+        <div class="milk-log" id="milkLogDisplay"></div>
+      </div>
+    </div>
+
+    <!-- 5. 喝奶作息时间表 -->
+    <div class="section" id="sec-milk">
+      <div class="month-badge" id="milkBadge">喝奶作息</div>
+
+      <div class="info-banner" id="milkStandard">
+        <span>🍼</span><span>加载中...</span>
+      </div>
+
+      <div class="card">
+        <h3><span class="emoji">⏰</span>自定义喝奶时段</h3>
+        <div class="dairy-input">
+          <input type="time" id="scheduleTime" placeholder="时间">
+          <input type="number" id="scheduleAmount" placeholder="单次奶量(ml)" style="width:140px">
+          <input type="text" id="scheduleNote" placeholder="备注（如：晨奶/睡前奶）" style="width:160px">
+          <button onclick="addMilkSchedule()">添加时段</button>
+        </div>
+        <div class="milk-log" id="milkScheduleDisplay"></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="emoji">📊</span>今日奶量汇总</h3>
+        <div id="milkSummary"></div>
+      </div>
+    </div>
+
+    <!-- 6. 疫苗接种台账 -->
+    <div class="section" id="sec-vaccine">
+      <div class="month-badge" id="vaccineBadge">疫苗台账</div>
+
+      <div class="btn-group">
+        <button class="btn btn-sm" onclick="exportVaccineRecord()">📋 导出疫苗清单</button>
+        <button class="btn btn-soft btn-sm" onclick="addCustomVaccine()">➕ 添加二类疫苗</button>
+      </div>
+
+      <div class="card">
+        <h3><span class="emoji">💉</span>国家一类疫苗（免费）标准接种时间表</h3>
+        <p style="font-size:13px;color:var(--text-light);margin-bottom:8px">系统根据出生日期自动计算每针接种日期</p>
+        <div style="overflow-x:auto">
+          <table class="vaccine-table" id="vaccineTable">
+            <thead>
+              <tr><th>疫苗名称</th><th>接种月龄</th><th>计划接种日期</th><th>状态</th><th>接种后备注</th><th>操作</th></tr>
+            </thead>
+            <tbody id="vaccineBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="emoji">📌</span>接种提醒</h3>
+        <div id="vaccineReminder"></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="emoji">📝</span>二类疫苗（自费）计划</h3>
+        <div style="overflow-x:auto">
+          <table class="vaccine-table">
+            <thead><tr><th>疫苗名称</th><th>计划接种日期</th><th>状态</th><th>备注</th><th>操作</th></tr></thead>
+            <tbody id="customVaccineBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 修改日期弹窗 -->
+<div id="dateModal" style="display:none;position:fixed;inset:0;background:rgba(74,55,40,.5);display:none;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(4px)">
+  <div class="box" style="background:var(--card);border-radius:24px;padding:36px;width:360px;max-width:90vw;text-align:center">
+    <h2 style="color:var(--primary-dark);margin-bottom:8px">修改出生日期</h2>
+    <p style="color:var(--text-light);font-size:14px;margin-bottom:24px">修改后全部数据将自动重新计算</p>
+    <input type="date" id="birthInput2" style="width:100%;padding:12px 16px;border:2px solid var(--border);border-radius:12px;font-size:16px;text-align:center;outline:none;margin-bottom:16px">
+    <div style="display:flex;gap:8px">
+      <button class="btn-soft" style="flex:1;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--card);cursor:pointer;font-size:15px" onclick="closeDateModal()">取消</button>
+      <button style="flex:1;padding:12px;border-radius:12px;border:none;background:var(--primary);color:#fff;cursor:pointer;font-size:15px;font-weight:600" onclick="saveBirthDate2()">确认修改</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ 月龄数据库 ============
+const DB = {
+  // 辅食数据 0-12月
+  food: {
+    0: { texture:"纯母乳或配方奶喂养，暂不添加辅食", meals:[], newFoods:[], allergy:"6月龄前不添加任何辅食", forbidden:["所有固体食物","蜂蜜","盐","糖"] },
+    1: { texture:"纯母乳或配方奶喂养", meals:[], newFoods:[], allergy:"6月龄前不添加任何辅食", forbidden:["所有固体食物","蜂蜜","盐","糖"] },
+    2: { texture:"纯母乳或配方奶喂养", meals:[], newFoods:[], allergy:"6月龄前不添加任何辅食", forbidden:["所有固体食物","蜂蜜","盐","糖"] },
+    3: { texture:"纯母乳或配方奶喂养", meals:[], newFoods:[], allergy:"6月龄前不添加任何辅食", forbidden:["所有固体食物","蜂蜜","盐","糖"] },
+    4: { texture:"纯母乳或配方奶喂养。部分宝宝可开始尝试少量强化铁米粉糊", meals:[{time:"上午",food:"母乳/配方奶",desc:"按需喂养"}], newFoods:["可少量尝试强化铁米粉（稀糊状）"], allergy:"初次尝试米粉需观察3天，注意有无皮疹、腹泻", forbidden:["所有固体辅食","蜂蜜","盐","糖","坚果","蛋白"] },
+    5: { texture:"强化铁米粉糊为主，质地为稀糊状，可逐渐过渡到稠糊", meals:[
+      {time:"上午10:00",food:"强化铁米粉糊",desc:"1-2茶匙，稀糊状"},
+      {time:"下午14:00",food:"单一蔬菜泥",desc:"1茶匙，观察过敏"},
+      {time:"其余时段",food:"母乳/配方奶",desc:"按需喂养为主"}
+    ], newFoods:["强化铁米粉","胡萝卜泥","南瓜泥","红薯泥"], allergy:"每添加一种新食物需观察3天，记录有无红疹、腹泻、呕吐", forbidden:["蜂蜜","盐","糖","坚果整粒","蛋白","海鲜","牛奶"] },
+    6: { texture:"泥糊状食物，由稀到稠过渡。米粉稠度类似酸奶", meals:[
+      {time:"上午10:00",food:"强化铁米粉+蔬菜泥",desc:"2-3汤匙"},
+      {time:"下午14:00",food:"水果泥",desc:"1-2茶匙"},
+      {time:"傍晚17:00",food:"蔬菜泥/蛋黄（1/4）",desc:"少量尝试"},
+      {time:"其余时段",food:"母乳/配方奶",desc:"每日600-800ml"}
+    ], newFoods:["蛋黄（1/4个开始）","西兰花泥","土豆泥","香蕉泥","苹果泥","菠菜泥"], allergy:"蛋黄需从1/4个开始，连续观察3天。蛋白暂不添加", forbidden:["蜂蜜","盐","糖","整粒坚果","蛋白","鲜牛奶","虾蟹","花生"] },
+    7: { texture:"泥糊过渡到细颗粒状，可尝试较稠的泥和软烂碎末", meals:[
+      {time:"上午10:00",food:"米粉/烂粥+蔬菜碎末",desc:"3-4汤匙"},
+      {time:"下午14:00",food:"水果泥+蛋黄",desc:"半个蛋黄"},
+      {time:"傍晚17:00",food:"肉泥/鱼泥+蔬菜",desc:"1-2汤匙"},
+      {time:"其余时段",food:"母乳/配方奶",desc:"每日600ml左右"}
+    ], newFoods:["猪肉泥","鸡肉泥","鳕鱼泥（去刺）","番茄泥","牛油果泥"], allergy:"鱼类需仔细去刺，首次尝试仅一小口，观察3天有无过敏", forbidden:["蜂蜜","盐","糖","整粒坚果","蛋白","鲜牛奶","虾蟹","花生"] },
+    8: { texture:"碎末状，可尝试软烂的小颗粒。质地类似豆腐", meals:[
+      {time:"上午10:00",food:"软烂粥/烂面条+蔬菜",desc:"小半碗"},
+      {time:"下午14:00",food:"水果碎+蛋黄",desc:"1个蛋黄"},
+      {time:"傍晚17:00",food:"肉末粥+蔬菜碎",desc:"小半碗"},
+      {time:"其余时段",food:"母乳/配方奶",desc:"每日500-600ml"}
+    ], newFoods:["软烂面条","豆腐泥","肝泥（鸡肝/猪肝）","豌豆泥","蓝莓泥"], allergy:"肝泥富含铁，每周1-2次即可，不宜过多。注意维生素A摄入", forbidden:["蜂蜜","盐","糖","整粒坚果","蛋白（可少量尝试）","鲜牛奶","虾蟹"] },
+    9: { texture:"小颗粒状，可尝试软烂的块状食物，鼓励用手抓食", meals:[
+      {time:"上午10:00",food:"软饭/烂粥+蔬菜",desc:"半碗"},
+      {time:"下午14:00",food:"水果小块+蛋黄/蒸蛋",desc:"适量"},
+      {time:"傍晚17:00",food:"肉末面条+蔬菜",desc:"半碗"},
+      {time:"其余时段",food:"母乳/配方奶",desc:"每日500ml左右"}
+    ], newFoods:["软烂米饭","蒸全蛋（从少量开始）","虾泥（少量）","西梅泥","奶酪（少量）"], allergy:"全蛋从少量开始尝试，虾类从极少量开始观察", forbidden:["蜂蜜","盐","糖","整粒坚果","鲜牛奶","大块食物","腌制食品"] },
+    10: { texture:"小块状，质地接近成人食物的软烂版本。鼓励自主进食", meals:[
+      {time:"上午10:00",food:"软饭+蔬菜+蛋黄",desc:"小碗"},
+      {time:"下午14:00",food:"水果块+小点心",desc:"适量"},
+      {time:"傍晚17:00",food:"面条/馄饨+肉末蔬菜",desc:"小碗"},
+      {time:"其余时段",food:"母乳/配方奶",desc:"每日500ml"}
+    ], newFoods:["小馄饨皮","馒头小块","饺子（少盐馅）","木瓜泥","无糖酸奶"], allergy:"奶制品从少量开始，注意乳糖耐受情况", forbidden:["蜂蜜","盐","糖","整粒坚果","大块食物","腌制食品","加工肉制品"] },
+    11: { texture:"小块状，接近成人食物软烂版，可尝试更多食材", meals:[
+      {time:"早餐",food:"粥/蛋羹+小面包",desc:"小碗"},
+      {time:"午餐",food:"软饭+蔬菜+肉/鱼",desc:"小碗"},
+      {time:"下午茶",food:"水果+点心",desc:"适量"},
+      {time:"晚餐",food:"面条/粥+蔬菜",desc:"小碗"},
+      {time:"其余时段",food:"母乳/配方奶",desc:"每日400-500ml"}
+    ], newFoods:["全蛋料理","小饺子","三文鱼（去刺）","猕猴桃（少量）"], allergy:"海鲜类每次只尝试一种，连续观察3天", forbidden:["蜂蜜","盐","糖","整粒坚果","大块食物","腌制食品","加工肉制品"] },
+    12: { texture:"接近成人食物软烂版，可尝试自主进餐", meals:[
+      {time:"早餐",food:"蛋羹+粥+水果",desc:"小碗"},
+      {time:"午餐",food:"软饭+蔬菜+肉/鱼",desc:"小碗"},
+      {time:"下午茶",food:"水果+小点心/酸奶",desc:"适量"},
+      {time:"晚餐",food:"面条/饺子+蔬菜",desc:"小碗"},
+      {time:"其余时段",food:"母乳/配方奶",desc:"每日400ml左右"}
+    ], newFoods:["多样食材组合","家庭餐（少盐版）"], allergy:"满1岁后可尝试蜂蜜和全脂牛奶，但仍需观察", forbidden:["整粒坚果（窒息风险）","高盐高糖食品","腌制食品","加工肉制品"] }
+  },
+
+  // 早教游戏
+  games: {
+    0: { motor:[{title:"俯卧抬头练习",steps:["让宝宝趴在较硬的床上","用摇铃在正前方引逗","每次1-2分钟，每日2-3次"],ability:"颈部肌肉力量",safe:"必须在成人看护下进行，宝宝清醒情绪好时练习"}],
+        fine:[{title:"抓握反射训练",steps:["将手指或摇铃放入宝宝掌心","让宝宝自然抓握","轻轻拉动感受力量"],ability:"手部抓握能力",safe:"动作轻柔，不要强行拉扯"}],
+        logic:[{title:"黑白卡追视",steps:["在距宝宝20-30cm处展示黑白卡","缓慢左右移动","每次30秒-1分钟"],ability:"视觉追踪",safe:"距离适中，注意宝宝是否疲劳"}],
+        music:[{title:"轻柔音乐聆听",steps:["播放轻柔的摇篮曲","抱着宝宝轻轻摇晃","每日1-2次，每次5-10分钟"],ability:"听觉发育",safe:"音量柔和，避免嘈杂环境"}] },
+    1: { motor:[{title:"俯卧抬胸",steps:["趴着时用玩具引逗","鼓励宝宝努力抬头看","每次2-3分钟"],ability:"颈部及上肢力量",safe:"在喂奶后1小时进行"}],
+        fine:[{title:"触碰玩具",steps:["在宝宝手边放摇铃","引导宝宝触碰","可发出声音引起注意"],ability:"手眼协调",safe:"玩具材质安全，无小零件"}],
+        logic:[{title:"追声练习",steps:["在宝宝侧面呼唤","让宝宝转头寻找声源","左右交替进行"],ability:"听觉定位",safe:"声音温柔，不突然惊吓"}],
+        music:[{title:"亲子歌谣",steps:["边哼唱边与宝宝对视","配合简单手势","重复同一首歌谣"],ability:"语言感知",safe:"节奏舒缓"}] },
+    2: { motor:[{title:"俯卧肘撑",steps:["宝宝趴着用前臂支撑","玩具在前方引逗","每次3-5分钟"],ability:"颈背肌肉",safe:"看护下进行"}],
+        fine:[{title:"抓握摇铃",steps:["把摇铃递到宝宝手中","引导摇晃发出声音","左右手交替"],ability:"主动抓握",safe:"摇铃轻便安全"}],
+        logic:[{title:"镜子游戏",steps:["抱宝宝到安全镜前","让宝宝看镜子里的自己","观察反应"],ability:"自我认知萌芽",safe:"使用安全镜，家长抱稳"}],
+        music:[{title:"不同音色体验",steps:["用不同材质敲击出声","如木勺敲碗、沙锤","让宝宝聆听"],ability:"音色辨别",safe:"音量适中"}] },
+    3: { motor:[{title:"翻身练习",steps:["宝宝仰卧","用玩具在一侧引逗","辅助宝宝侧身到翻身"],ability:"翻身能力",safe:"在平整安全表面进行"}],
+        fine:[{title:"抓积木",steps:["递给宝宝小积木","引导双手抓握","练习换手"],ability:"双手协调",safe:"积木大小适中，无棱角"}],
+        logic:[{title:"躲猫猫",steps:["用手帕遮住脸","掀开说'喵'","反复进行"],ability:"客体永久性",safe:"注意不要遮住宝宝口鼻"}],
+        music:[{title:"节奏拍打",steps:["握着宝宝的小手","跟着音乐拍打桌面","感受节奏"],ability:"节奏感知",safe:"动作轻柔"}] },
+    4: { motor:[{title:"靠坐练习",steps:["用靠枕支撑宝宝背部","让宝宝半靠坐","逐渐减少支撑"],ability:"核心力量",safe:"背后有支撑，防止后仰"}],
+        fine:[{title:"纸巾抽拉",steps:["给宝宝一盒纸巾","让宝宝抽拉","反复进行"],ability:"手部精细",safe:"选择无香纸巾，防止塞嘴"}],
+        logic:[{title:"敲打玩具",steps:["给宝宝两个积木","引导对敲","发出声音"],ability:"因果关系",safe:"积木轻便"}],
+        music:[{title:"敲击小鼓",steps:["给宝宝玩具小鼓","示范敲击","让宝宝模仿"],ability:"因果关系与节奏",safe:"鼓面柔软"}] },
+    5: { motor:[{title:"翻身翻滚",steps:["用玩具引导宝宝连续翻身","从仰卧翻到俯卧再翻回","左右交替"],ability:"躯干协调",safe:"在安全区域，防止跌落"}],
+        fine:[{title:"撕纸游戏",steps:["给宝宝安全的纸","引导撕扯","锻炼手指力量"],ability:"手指捏取",safe:"防止塞入口中"}],
+        logic:[{title:"寻物游戏",steps:["当着宝宝的面藏起玩具","问'玩具去哪了'","引导寻找"],ability:"客体永久性",safe:"玩具大小适中"}],
+        music:[{title:"音乐瓶",steps:["在空瓶中装入米粒","摇晃发出声音","让宝宝模仿"],ability:"听觉与动作",safe:"瓶盖拧紧"}] },
+    6: { motor:[{title:"独坐练习",steps:["让宝宝在垫子上尝试独坐","前方放玩具支撑","逐渐延长独坐时间"],ability:"独坐平衡",safe:"周围有软垫保护"},
+          {title:"匍匐前进",steps:["趴着时在前方放玩具","用掌心抵住宝宝脚掌","助力向前蹬"],ability:"匍匐爬行",safe:"在平整安全地面"}],
+        fine:[{title:"捏取小物",steps:["在宝宝面前放溶豆或小馒头","引导用拇指和食指捏取","放入口中或容器"],ability:"拇食指对捏",safe:"食物大小适中，防止噎呛"},
+          {title:"敲击积木",steps:["一手一块积木","对敲发出声音","左右交替"],ability:"双手协调"}],
+        logic:[{title:"因果玩具",steps:["提供按键发声玩具","示范按键发声","让宝宝自己操作"],ability:"因果关系认知",safe:"玩具无小零件脱落"}],
+        music:[{title:"沙锤摇",steps:["给宝宝自制沙瓶","随音乐节奏摇晃","示范后让宝宝模仿"],ability:"节奏与动作协调",safe:"瓶盖拧紧，内容物安全"}] },
+    7: { motor:[{title:"手膝爬行",steps:["宝宝趴着用手和膝盖支撑","前方放玩具引逗","鼓励向前爬"],ability:"四肢协调爬行",safe:"地面铺设爬行垫"},
+          {title:"坐起转身",steps:["独坐时在侧面放玩具","引导转身够取","左右交替"],ability:"坐位平衡"}],
+        fine:[{title:"食指按键",steps:["提供有按钮的玩具","示范用食指按","让宝宝模仿"],ability:"食指灵活性",safe:"按钮大小适中"},
+          {title:"转移物品",steps:["让宝宝将积木从一只手换到另一只手","反复练习","可双手交替"],ability:"手眼协调"}],
+        logic:[{title:"杯中取物",steps:["当着宝宝的面将玩具放入杯中","引导宝宝取出","反复进行"],ability:"客体永久性",safe:"玩具大小适中"}],
+        music:[{title:"拍手歌",steps:["唱儿歌配合拍手","引导宝宝模仿拍手","反复进行"],ability:"模仿能力",safe:"动作轻柔"}] },
+    8: { motor:[{title:"扶站练习",steps:["让宝宝扶着沙发或矮桌站立","前方放玩具引逗","每次1-2分钟"],ability:"下肢力量",safe:"家具稳固无尖锐边角"},
+          {title:"爬行追逐",steps:["和宝宝一起爬","或用球引导追逐","增加爬行距离"],ability:"爬行能力"}],
+        fine:[{title:"捏取小丸",steps:["放小馒头或泡芙在桌上","引导宝宝用拇食指捏取","自己送入口中"],ability:"精细对捏",safe:"食物大小适中"},
+          {title:"容器倒出",steps:["将积木放入容器再倒出","反复进行","让宝宝模仿"],ability:"因果关系"}],
+        logic:[{title:"指认图片",steps:["准备简单的认知卡片","指图说出名称","让宝宝用手指出"],ability:"认知与语言",safe:"卡片材质安全"}],
+        music:[{title:"跟随音乐摇摆",steps:["播放有节奏的音乐","抱着宝宝随节奏摇晃","或让坐着自己摇摆"],ability:"节奏感",safe:"动作幅度适中"}] },
+    9: { motor:[{title:"扶物移动",steps:["沿沙发或矮桌横向移动","前方引逗","练习扶走"],ability:"扶物行走",safe:"地面防滑，周围有保护"},
+          {title:"蹲起练习",steps:["引导宝宝扶着蹲下捡玩具","再站起来","反复练习"],ability:"下肢力量与平衡"}],
+        fine:[{title:"放物入杯",steps:["示范将积木放入杯中","让宝宝模仿","练习松手放入"],ability:"手眼协调与松手",safe:"积木大小适中"},
+          {title:"翻书页",steps:["和宝宝一起看布书","引导翻页","练习手指捏翻"],ability:"手指灵活性"}],
+        logic:[{title:"藏找玩具",steps:["当着宝宝的面用布盖住玩具","问'在哪里'","引导掀布找到"],ability:"客体永久性进阶",safe:"布料轻柔"}],
+        music:[{title:"乐器敲击",steps:["提供小鼓、铃铛等","示范敲击或摇晃","让宝宝自由探索"],ability:"音乐探索",safe:"乐器材质安全"}] },
+    10: { motor:[{title:"独站片刻",steps:["让宝宝不扶物站立几秒","前方引逗","逐渐延长时间"],ability:"独站平衡",safe:"周围有软垫"},
+          {title:"牵手行走",steps:["握住宝宝双手","引导向前迈步","逐渐减少辅助"],ability:"行走准备"}],
+        fine:[{title:"叠积木",steps:["示范将两块积木叠起","让宝宝模仿","练习放置",],ability:"空间认知与手眼协调",safe:"积木轻便"},
+          {title:"拇指食指捏",steps:["用溶豆或泡芙练习","精细对捏","自己送入口中"],ability:"精细对捏进阶"}],
+        logic:[{title:"形状盒",steps:["提供形状投放玩具","示范放入","让宝宝尝试"],ability:"形状认知",safe:"形状块大小适中"}],
+        music:[{title:"哼唱模仿",steps:["唱简单儿歌","引导宝宝哼唱模仿","如'啊-啊-啊'"],ability:"语言与音乐",safe:"轻松愉快氛围"}] },
+    11: { motor:[{title:"独走尝试",steps:["在两成人之间短距离行走","逐渐增加距离","鼓励宝宝独走"],ability:"独立行走",safe:"地面平整防滑，周围无尖锐物"},
+          {title:"扶栏上楼梯",steps:["双手扶栏","引导向上爬1-2级","成人密切保护"],ability:"四肢协调",safe:"楼梯口有防护"}],
+        fine:[{title:"握笔涂鸦",steps:["给宝宝粗蜡笔","在纸上示范涂画","让宝宝模仿"],ability:"握笔与涂鸦",safe:"蜡笔材质安全无毒"},
+          {title:"翻厚纸书",steps:["和宝宝一起翻厚页书","引导一页页翻","指认图画"],ability:"手指控制"}],
+        logic:[{title:"指认身体部位",steps:["问'鼻子在哪里'","引导宝宝指自己鼻子","扩展到其他部位"],ability:"认知与语言",safe:"轻松游戏氛围"}],
+        music:[{title:"随音乐拍手",steps:["播放儿歌","示范拍手","让宝宝跟着节奏"],ability:"节奏与模仿",safe:"环境安全"}] },
+    12: { motor:[{title:"独走稳",steps:["鼓励宝宝独立行走","在安全空间自由探索","增加行走距离"],ability:"独立行走",safe:"空间安全无障碍"},
+          {title:"蹲下起立",steps:["引导宝宝蹲下捡玩具","再站起来","不扶物练习"],ability:"平衡与协调"}],
+        fine:[{title:"叠3块积木",steps:["示范叠3块积木","让宝宝模仿","练习手眼协调"],ability:"空间认知",safe:"积木轻便"},
+          {title:"插棒游戏",steps:["提供插棒玩具","示范插入","让宝宝尝试"],ability:"手眼协调与精细"}],
+        logic:[{title:"图画书指认",steps:["翻开认知书","问'小狗在哪里'","引导宝宝指出"],ability:"认知与语言",safe:"书本材质安全"}],
+        music:[{title:"简易动作模仿",steps:["唱'拍手歌'","示范拍手、跺脚","让宝宝模仿"],ability:"动作模仿与节奏",safe:"动作简单安全"}] }
+  },
+
+  // 育儿知识
+  knowledge: {
+    0: { growth:[{h:"身高：50-58cm",w:"体重：3.2-5.5kg",hc:"头围：34-38cm"}], sleep:"每日16-20小时，昼夜不分，2-3小时醒一次吃奶", feed:"按需哺乳，每日8-12次。母乳优先，配方奶为补充", issues:[{q:"黄疸",a:"生理性黄疸2-3天出现，7-14天消退。如持续升高或出生24小时内出现需就医"},{q:"脐带护理",a:"保持干燥清洁，用75%酒精消毒，通常1-2周脱落"},{q:"吐奶",a:"少量溢奶正常，喂奶后竖抱拍嗝15-20分钟"}], care:"勤换尿布预防红屁屁，每日洗澡不超过10分钟，室温保持22-26℃" },
+    1: { growth:[{h:"身高：54-62cm",w:"体重：4.0-6.5kg",hc:"头围：36-40cm"}], sleep:"每日15-17小时，夜睡延长，白天小睡3-4次", feed:"按需哺乳，每日6-8次。母乳或配方奶600-900ml/日", issues:[{q:"肠绞痛",a:"多在傍晚哭闹，可做蹬自行车动作帮助排气，通常4月龄后缓解"},{q:"湿疹",a:"注意保湿，穿纯棉衣物，避免过热。严重时就医"},{q:"夜醒频繁",a:"建立睡前仪式，白天多互动消耗精力"}], care:"开始练习趴着，每日俯卧时间从短到长，注意颈部清洁" },
+    2: { growth:[{h:"身高：57-65cm",w:"体重：4.7-7.5kg",hc:"头围：37-42cm"}], sleep:"每日14-16小时，夜睡延长可能睡5-6小时", feed:"每日6-8次，奶量600-900ml。可能出现猛长期频繁要奶", issues:[{q:"猛长期",a:"约2-3天频繁吃奶，是正常现象，按需增加喂养"},{q:"流口水",a:"唾液腺发育，属正常现象，注意擦拭保持干燥"},{q:"偏头",a:"注意变换睡姿，多趴着，避免长期同一姿势"}], care:"增加互动时间，做被动操，多趴着练习抬头" },
+    3: { growth:[{h:"身高：60-68cm",w:"体重：5.5-8.5kg",hc:"头围：39-43cm"}], sleep:"每日14-15小时，夜睡6-8小时，白天小睡3次", feed:"每日5-6次，奶量600-900ml。奶量趋于稳定", issues:[{q:"翻身期",a:"开始尝试翻身，注意安全防止跌落"},{q:"厌奶期",a:"可能因对周围好奇而分心，安静环境喂奶"},{q:"出牙准备",a:"可能开始流口水增多、咬东西，准备牙胶"}], care:"多做翻身练习，增加俯卧时间，可开始使用牙胶" },
+    4: { growth:[{h:"身高：62-70cm",w:"体重：6.0-9.0kg",hc:"头围：40-44cm"}], sleep:"每日13-15小时，夜睡8-10小时，白天小睡2-3次", feed:"每日5-6次，奶量700-900ml。可开始尝试少量辅食", issues:[{q:"辅食添加准备",a:"能竖头、对食物有兴趣、舌挺反射减弱时可开始"},{q:"夜醒倒退",a:"4月龄睡眠倒退期，可能与大运动发展有关"},{q:"出牙",a:"可能开始长第一颗牙，提供冷藏牙胶"}], care:"开始练习靠坐，提供适合的玩具促进手部发展" },
+    5: { growth:[{h:"身高：64-72cm",w:"体重：6.5-9.5kg",hc:"头围：41-45cm"}], sleep:"每日13-14小时，夜睡9-10小时，白天小睡2-3次", feed:"每日4-5次奶+1-2次辅食，奶量600-800ml", issues:[{q:"辅食适应",a:"从单一食材少量开始，每3天添加一种新食材"},{q:"便秘",a:"添加辅食后可能便秘，多喝水、适量果汁"},{q:"分离焦虑萌芽",a:"开始认生，多陪伴建立安全感"}], care:"练习独坐，增加翻身和爬行准备活动" },
+    6: { growth:[{h:"身高：65-74cm",w:"体重：6.8-10.0kg",hc:"头围：42-46cm"}], sleep:"每日13-14小时，夜睡10小时，白天小睡2次", feed:"每日3-4次奶+2次辅食，奶量600-800ml。辅食1-2餐", issues:[{q:"出牙不适",a:"提供冷藏牙胶，用干净纱布按摩牙龈"},{q:"辅食抗拒",a:"不强迫，更换食材和做法，保持愉快进餐氛围"},{q:"夜醒",a:"排除饥饿、不适原因，建立睡前仪式"}], care:"练习独坐和爬行准备，提供安全的探索环境" },
+    7: { growth:[{h:"身高：67-76cm",w:"体重：7.0-10.5kg",hc:"头围：43-47cm"}], sleep:"每日13小时，夜睡10-11小时，白天小睡2次", feed:"每日3次奶+2-3次辅食，奶量500-700ml。辅食可增加稠度", issues:[{q:"爬行发展",a:"鼓励多爬，提供安全爬行空间和吸引物"},{q:"认生明显",a:"正常发展，给时间适应，不强求接触陌生人"},{q:"蛋白过敏",a:"添加蛋白需谨慎，如有红疹腹泻需就医"}], care:"鼓励爬行探索，提供不同材质触觉体验，注意家居安全" },
+    8: { growth:[{h:"身高：69-78cm",w:"体重：7.3-10.8kg",hc:"头围：44-48cm"}], sleep:"每日12-13小时，夜睡11小时，白天小睡2次", feed:"每日3次奶+3次辅食，奶量500-700ml。辅食为主食", issues:[{q:"扶站",a:"开始扶物站立，注意家具稳固安全"},{q:"挑食",a:"多样化食材，不强迫进食，榜样示范"},{q:"出牙增多",a:"用硅胶指套或软毛刷清洁已出的牙齿"}], care:"鼓励爬行和扶站，加强家居安全防护，开始口腔清洁" },
+    9: { growth:[{h:"身高：70-80cm",w:"体重：7.5-11.0kg",hc:"头围：45-48cm"}], sleep:"每日12-13小时，夜睡11小时，白天小睡1-2次", feed:"每日3次奶+3次辅食，奶量500-600ml。辅食向块状过渡", issues:[{q:"抓食发展",a:"鼓励用手抓食，锻炼手眼协调"},{q:"站立",a:"扶物站立时间延长，可练习蹲起"},{q:"语言发展",a:"开始理解简单指令，多与宝宝说话"}], care:"提供安全站立和移动环境，多与宝宝交流互动" },
+    10: { growth:[{h:"身高：72-82cm",w:"体重：7.7-11.3kg",hc:"头围：45-49cm"}], sleep:"每日12小时，夜睡11小时，白天小睡1-2次", feed:"每日3次正餐+2次加餐+3次奶，奶量400-500ml", issues:[{q:"独站",a:"开始尝试独站，注意保护"},{q:"分离焦虑",a:"建立短暂分离的游戏，如躲猫猫"},{q:"扔东西",a:"探索因果关系，正常行为，可提供安全物品"}], care:"鼓励自主进食，提供手指食物，注意家居安全全覆盖" },
+    11: { growth:[{h:"身高：73-84cm",w:"体重：7.9-11.5kg",hc:"头围：46-49cm"}], sleep:"每日12小时，夜睡11小时，白天小睡1次", feed:"每日3次正餐+2次加餐+2-3次奶，奶量400-500ml", issues:[{q:"学步",a:"可牵手行走，不急用学步车，鼓励自然发展"},{q:"挑食",a:"保持食材多样，不强求，榜样示范"},{q:"语言爆发",a:"多说话多读绘本，回应宝宝的咿呀学语"}], care:"鼓励行走和探索，提供丰富语言环境，每日亲子阅读" },
+    12: { growth:[{h:"身高：75-86cm",w:"体重：8.1-11.8kg",hc:"头围：46-49cm"}], sleep:"每日11-12小时，夜睡11小时，白天小睡1次", feed:"每日3次正餐+2次加餐+2次奶，奶量400ml左右。可过渡到全脂牛奶", issues:[{q:"独走",a:"开始独立行走，注意安全防护"},{q:"情绪表达",a:"会有情绪表达，理解和引导情绪"},{q:"饮食过渡",a:"向家庭饮食过渡，注意少盐少糖"}], care:"鼓励行走和探索，建立规律作息，丰富语言和认知环境" }
+  },
+
+  // 疫苗标准时间表（月龄）
+  vaccines: [
+    {name:"乙肝疫苗（第1针）",month:0,note:"出生24小时内接种"},
+    {name:"卡介苗",month:0,note:"出生后尽早接种"},
+    {name:"乙肝疫苗（第2针）",month:1,note:"1月龄"},
+    {name:"脊灰灭活疫苗（第1针）",month:2,note:"2月龄"},
+    {name:"脊灰减毒活疫苗（第2针）",month:3,note:"3月龄"},
+    {name:"百白破疫苗（第1针）",month:3,note:"3月龄"},
+    {name:"脊灰减毒活疫苗（第3针）",month:4,note:"4月龄"},
+    {name:"百白破疫苗（第2针）",month:4,note:"4月龄"},
+    {name:"百白破疫苗（第3针）",month:5,note:"5月龄"},
+    {name:"乙肝疫苗（第3针）",month:6,note:"6月龄"},
+    {name:"A群流脑多糖疫苗（第1针）",month:6,note:"6月龄"},
+    {name:"A群流脑多糖疫苗（第2针）",month:9,note:"9月龄，与第1针间隔≥3个月"},
+    {name:"麻腮风疫苗（第1针）",month:8,note:"8月龄"},
+    {name:"麻腮风疫苗（第2针）",month:18,note:"18月龄"},
+    {name:"乙脑减毒活疫苗（第1针）",month:8,note:"8月龄"},
+    {name:"乙脑减毒活疫苗（第2针）",month:24,note:"24月龄"},
+    {name:"甲肝减毒活疫苗",month:18,note:"18月龄"},
+    {name:"百白破疫苗（第4针）",month:18,note:"18月龄"},
+    {name:"脊灰减毒活疫苗（第4针）",month:48,note:"4岁"},
+    {name:"麻腮风疫苗（第3针）",month:72,note:"6岁"},
+    {name:"白破疫苗",month:72,note:"6岁"}
+  ],
+
+  // 每月营养需求参考
+  nutritionRef: {
+    0: "纯母乳或配方奶，按需喂养，每日8-12次",
+    1: "纯母乳或配方奶，每日6-8次，奶量600-900ml",
+    2: "纯母乳或配方奶，每日5-7次，奶量600-900ml",
+    3: "纯母乳或配方奶为主，每日5-6次，奶量600-900ml",
+    4: "奶量700-900ml，可开始尝试少量辅食",
+    5: "奶量600-800ml + 1-2餐辅食",
+    6: "奶量600-800ml + 1-2餐辅食，每日铁摄入约10mg",
+    7: "奶量500-700ml + 2-3餐辅食，注重铁锌补充",
+    8: "奶量500-600ml + 2-3餐辅食，增加蛋白质来源",
+    9: "奶量500-600ml + 3餐辅食，多样化食材",
+    10: "奶量400-500ml + 3餐+加餐，辅食为主",
+    11: "奶量400-500ml + 3餐+2加餐，接近家庭饮食",
+    12: "奶量约400ml + 3餐+2加餐，可过渡全脂牛奶"
+  },
+
+  // 标准奶量参考
+  milkStandard: {
+    0: "每日8-12次按需哺乳，奶量无固定标准，约60-90ml/次",
+    1: "每日6-8次，单次90-120ml，全天约600-900ml",
+    2: "每日5-7次，单次120-150ml，全天约600-900ml",
+    3: "每日5-6次，单次150-180ml，全天约700-900ml",
+    4: "每日5-6次，单次150-180ml，全天约700-900ml",
+    5: "每日4-5次奶+1-2餐辅食，全天奶量600-800ml",
+    6: "每日3-4次奶+2餐辅食，全天奶量600-800ml",
+    7: "每日3次奶+2-3餐辅食，全天奶量500-700ml",
+    8: "每日3次奶+3餐辅食，全天奶量500-600ml",
+    9: "每日3次奶+3餐辅食，全天奶量500-600ml",
+    10: "每日2-3次奶+3餐+加餐，全天奶量400-500ml",
+    11: "每日2-3次奶+3餐+2加餐，全天奶量400-500ml",
+    12: "每日2次奶+3餐+2加餐，全天奶量约400ml"
+  },
+
+  // 食物清单
+  foodList: {
+    veg:["胡萝卜","南瓜","红薯","西兰花","菠菜","土豆","番茄","黄瓜","冬瓜","山药","玉米","青菜","娃娃菜","芦笋","紫薯"],
+    fruit:["苹果","香蕉","梨","蓝莓","牛油果","火龙果","猕猴桃","木瓜","西梅","橙子","葡萄","草莓","桃子","樱桃","哈密瓜"],
+    grain:["强化铁米粉","大米粥","小米粥","软烂面条","软饭","馒头","小馄饨","饺子皮","燕麦粥","玉米糊","小面包","土豆泥","红薯粥"],
+    protein:["蛋黄","全蛋","猪肉泥","鸡肉泥","牛肉泥","猪肝泥","鳕鱼泥","三文鱼","豆腐","奶酪","无糖酸奶","虾泥","鸡肝泥","豌豆泥"]
+  }
+};
+
+// ============ 状态管理 ============
+let state = {
+  birthDate: null,
+  currentSection: 'food',
+  dailyChecks: {},  // {date: {foodId: true}}
+  milkRecords: {},  // {date: [{time,amount}]}
+  milkSchedule: [], // [{time,amount,note}]
+  vaccineRecords: {}, // {vaccineName: {status, note, date}}
+  customVaccines: [] // [{name,planDate,status,note}]
+};
+
+function todayKey(){ return new Date().toISOString().split('T')[0]; }
+
+// 日期计算
+function calcAge(birth){
+  const now = new Date();
+  const b = new Date(birth);
+  let years = now.getFullYear()-b.getFullYear();
+  let months = now.getMonth()-b.getMonth();
+  let days = now.getDate()-b.getDate();
+  if(days<0){ months--; const prev=new Date(now.getFullYear(),now.getMonth(),0); days+=prev.getDate(); }
+  if(months<0){ years--; months+=12; }
+  const totalDays = Math.floor((now-b)/(1000*60*60*24));
+  return {years,months,days,totalDays};
+}
+
+function getMonthAge(){
+  if(!state.birthDate) return 0;
+  const a = calcAge(state.birthDate);
+  let m = a.years*12+a.months;
+  return Math.min(Math.max(m,0),12);
+}
+
+function getMonthAgeText(){
+  if(!state.birthDate) return '—';
+  const a = calcAge(state.birthDate);
+  if(a.years>0) return `${a.years}岁${a.months}个月`;
+  return `${a.months}个月${a.days}天`;
+}
+
+// ============ 存储 ============
+function saveState(){
+  localStorage.setItem('zhizhi_state', JSON.stringify(state));
+}
+function loadState(){
+  const s = localStorage.getItem('zhizhi_state');
+  if(s){ try{ state = {...state, ...JSON.parse(s)}; }catch(e){} }
+}
+
+// ============ 初始化 ============
+function saveBirthDate(){
+  const d = document.getElementById('birthInput').value;
+  if(!d){ showToast('请选择出生日期'); return; }
+  state.birthDate = d;
+  saveState();
+  document.getElementById('initModal').style.display='none';
+  refreshAll();
+  showToast('之之宝宝的工作台已就绪 ✨');
+}
+
+function openDateModal(){
+  document.getElementById('birthInput2').value = state.birthDate || '';
+  document.getElementById('dateModal').style.display='flex';
+}
+function closeDateModal(){
+  document.getElementById('dateModal').style.display='none';
+}
+function saveBirthDate2(){
+  const d = document.getElementById('birthInput2').value;
+  if(!d){ showToast('请选择出生日期'); return; }
+  state.birthDate = d;
+  saveState();
+  closeDateModal();
+  refreshAll();
+  showToast('出生日期已更新，全部数据已重新计算');
+}
+
+function refreshAll(){
+  updateTopBar();
+  renderFood();
+  renderGames();
+  renderKnowledge();
+  renderNutrition();
+  renderMilk();
+  renderVaccine();
+}
+
+function updateTopBar(){
+  document.getElementById('topBirth').textContent = state.birthDate || '—';
+  if(state.birthDate){
+    const a = calcAge(state.birthDate);
+    document.getElementById('topDays').textContent = a.totalDays;
+    document.getElementById('topMonthAge').textContent = getMonthAgeText();
+  }
+}
+
+// ============ 菜单切换 ============
+function switchSection(sec){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('sec-'+sec).classList.add('active');
+  document.querySelector(`.nav-item[data-sec="${sec}"]`).classList.add('active');
+  state.currentSection = sec;
+  saveState();
+}
+
+// ============ 1. 辅食 ============
+function renderFood(){
+  const m = getMonthAge();
+  const data = DB.food[m] || DB.food[12];
+  document.getElementById('foodMonthBadge').textContent = `🍽 ${m}月龄辅食方案`;
+  document.getElementById('foodTexture').innerHTML = `<p style="font-size:14px">${data.texture}</p>`;
+  const mealHTML = data.meals.length ? data.meals.map(meal=>`
+    <div class="meal-card">
+      <div class="time">${meal.time}</div>
+      <div class="food">${meal.food}</div>
+      <div class="desc">${meal.desc}</div>
+    </div>`).join('') : '<p style="color:var(--text-light);font-size:13px">本阶段以奶为主，暂不添加辅食</p>';
+  document.getElementById('mealPlan').innerHTML = mealHTML;
+
+  document.getElementById('newFoodOrder').innerHTML = data.newFoods.length ?
+    data.newFoods.map((f,i)=>`<span class="tag tag-green">步骤${i+1}：${f}</span>`).join('') :
+    '<p style="color:var(--text-light);font-size:13px">本阶段暂无新食材添加</p>';
+
+  document.getElementById('allergyTip').innerHTML = `<div class="warning-box">⚠️ ${data.allergy}</div>`;
+  document.getElementById('forbiddenFood').innerHTML = data.forbidden.map(f=>`<span class="tag tag-pink">${f}</span>`).join('');
+}
+
+// ============ 2. 早教游戏 ============
+function renderGames(){
+  const m = getMonthAge();
+  const data = DB.games[m] || DB.games[12];
+  document.getElementById('eduMonthBadge').textContent = `🎮 ${m}月龄早教游戏`;
+  const renderCat = (cat,cls)=>(data[cat]||[]).map(g=>`
+    <div class="game-card ${cls}">
+      <div class="gtitle">${g.title}</div>
+      <div class="gtags"><span class="tag tag-blue">💪 ${g.ability}</span></div>
+      <div class="gsteps"><ol>${g.steps.map(s=>`<li>${s}</li>`).join('')}</ol></div>
+      <div class="gsafe">⚠️ 安全注意：${g.safe}</div>
+    </div>`).join('');
+  document.getElementById('gameMotor').innerHTML = renderCat('motor','motor');
+  document.getElementById('gameFine').innerHTML = renderCat('fine','fine');
+  document.getElementById('gameLogic').innerHTML = renderCat('logic','logic');
+  document.getElementById('gameMusic').innerHTML = renderCat('music','music');
+}
+
+// ============ 3. 育儿知识 ============
+function renderKnowledge(){
+  const m = getMonthAge();
+  const data = DB.knowledge[m] || DB.knowledge[12];
+  document.getElementById('knowMonthBadge').textContent = `📚 ${m}月龄育儿知识`;
+  document.getElementById('growthData').innerHTML = data.growth.map(g=>`
+    <div class="know-item"><h4>📏 参考范围</h4><p>${g.h}<br>${g.w}<br>${g.hc}</p></div>`).join('');
+  document.getElementById('sleepData').innerHTML = `<p style="font-size:14px">${data.sleep}</p>`;
+  document.getElementById('feedFocus').innerHTML = `<p style="font-size:14px">${data.feed}</p>`;
+  document.getElementById('commonIssues').innerHTML = data.issues.map(i=>`
+    <div class="know-item"><h4>❓ ${i.q}</h4><p>${i.a}</p></div>`).join('');
+  document.getElementById('dailyCare').innerHTML = `<p style="font-size:14px">${data.care}</p>`;
+}
+
+// ============ 4. 营养打卡 ============
+function renderNutrition(){
+  const m = getMonthAge();
+  document.getElementById('nutritionBadge').textContent = `🥗 ${m}月龄营养打卡`;
+  document.getElementById('nutritionRef').innerHTML = `<span>📊</span><span>本月龄每日营养参考：${DB.nutritionRef[m]||DB.nutritionRef[12]}</span>`;
+  renderCheckList('veg', DB.foodList.veg);
+  renderCheckList('fruit', DB.foodList.fruit);
+  renderCheckList('grain', DB.foodList.grain);
+  renderCheckList('protein', DB.foodList.protein);
+  renderMilkLog();
+}
+
+function renderCheckList(cat, items){
+  const today = todayKey();
+  if(!state.dailyChecks[today]) state.dailyChecks[today]={};
+  const checks = state.dailyChecks[today];
+  document.getElementById('check-'+cat).innerHTML = items.map(f=>{
+    const id = cat+'_'+f;
+    const checked = checks[id] ? 'checked' : '';
+    return `<div class="check-item ${checked}" onclick="toggleCheck('${id}')"><input type="checkbox" ${checked?'checked':''}>${f}</div>`;
+  }).join('');
+}
+
+function toggleCheck(id){
+  const today = todayKey();
+  if(!state.dailyChecks[today]) state.dailyChecks[today]={};
+  state.dailyChecks[today][id] = !state.dailyChecks[today][id];
+  if(!state.dailyChecks[today][id]) delete state.dailyChecks[today][id];
+  saveState();
+  const cat = id.split('_')[0];
+  renderCheckList(cat, DB.foodList[cat]);
+}
+
+// ============ 奶量记录 ============
+function addMilkRecord(){
+  const time = document.getElementById('milkTime').value;
+  const amount = document.getElementById('milkAmount').value;
+  if(!time||!amount){ showToast('请输入时间和奶量'); return; }
+  const today = todayKey();
+  if(!state.milkRecords[today]) state.milkRecords[today]=[];
+  state.milkRecords[today].push({time, amount:parseInt(amount)});
+  saveState();
+  document.getElementById('milkTime').value='';
+  document.getElementById('milkAmount').value='';
+  renderMilkLog();
+  showToast('奶量已记录');
+}
+
+function renderMilkLog(){
+  const today = todayKey();
+  const records = state.milkRecords[today]||[];
+  let total = 0;
+  records.forEach(r=>total+=r.amount);
+  let html = '';
+  if(records.length){
+    html = '<table><thead><tr><th>时间</th><th>奶量(ml)</th><th>操作</th></tr></thead><tbody>';
+    records.forEach((r,i)=>{
+      html += `<tr><td>${r.time}</td><td>${r.amount}ml</td><td><button class="del" onclick="delMilkRecord(${i})">✕</button></td></tr>`;
+      total += 0;
+    });
+    html += `</tbody><tfoot><tr style="font-weight:600"><td>合计</td><td>${records.reduce((s,r)=>s+r.amount,0)}ml</td><td></td></tr></tfoot></table>`;
+  } else {
+    html = '<p style="color:var(--text-light);font-size:13px">今日暂无奶量记录</p>';
+  }
+  document.getElementById('milkLogDisplay').innerHTML = html;
+}
+
+function delMilkRecord(i){
+  const today = todayKey();
+  if(state.milkRecords[today]) state.milkRecords[today].splice(i,1);
+  saveState(); renderMilkLog();
+}
+
+// ============ 5. 喝奶作息 ============
+function renderMilk(){
+  const m = getMonthAge();
+  document.getElementById('milkBadge').textContent = `🍼 ${m}月龄喝奶作息`;
+  document.getElementById('milkStandard').innerHTML = `<span>🍼</span><span>本月龄标准奶量参考：${DB.milkStandard[m]||DB.milkStandard[12]}</span>`;
+  renderMilkSchedule();
+  renderMilkSummary();
+}
+
+function addMilkSchedule(){
+  const time = document.getElementById('scheduleTime').value;
+  const amount = document.getElementById('scheduleAmount').value;
+  const note = document.getElementById('scheduleNote').value;
+  if(!time||!amount){ showToast('请输入时间和奶量'); return; }
+  state.milkSchedule.push({time, amount:parseInt(amount), note:note||''});
+  saveState();
+  document.getElementById('scheduleTime').value='';
+  document.getElementById('scheduleAmount').value='';
+  document.getElementById('scheduleNote').value='';
+  renderMilkSchedule();
+  showToast('喝奶时段已添加');
+}
+
+function delMilkSchedule(i){
+  state.milkSchedule.splice(i,1);
+  saveState(); renderMilkSchedule();
+}
+
+function renderMilkSchedule(){
+  let html='';
+  if(state.milkSchedule.length){
+    html='<table><thead><tr><th>时间</th><th>奶量(ml)</th><th>备注</th><th>操作</th></tr></thead><tbody>';
+    state.milkSchedule.forEach((s,i)=>{
+      html+=`<tr><td>${s.time}</td><td>${s.amount}ml</td><td>${s.note}</td><td><button class="del" onclick="delMilkSchedule(${i})">✕</button></td></tr>`;
+    });
+    html+='</tbody></table>';
+  } else {
+    html='<p style="color:var(--text-light);font-size:13px">暂无自定义喝奶时段，请添加</p>';
+  }
+  document.getElementById('milkScheduleDisplay').innerHTML=html;
+}
+
+function renderMilkSummary(){
+  const today = todayKey();
+  const records = state.milkRecords[today]||[];
+  const total = records.reduce((s,r)=>s+r.amount,0);
+  const m = getMonthAge();
+  const std = DB.milkStandard[m]||'';
+  let status = '正常';
+  let cls = 'tag-green';
+  if(total>0){
+    if(total<400) {status='偏少，注意补充'; cls='tag-pink';}
+    else if(total>1000) {status='偏多，注意观察'; cls='tag-orange';}
+  }
+  document.getElementById('milkSummary').innerHTML = `
+    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+      <div style="text-align:center"><div style="font-size:32px;font-weight:700;color:var(--primary-dark)">${total}</div><div style="font-size:12px;color:var(--text-light)">今日总奶量(ml)</div></div>
+      <div><span class="tag ${cls}">${status}</span><p style="font-size:12px;color:var(--text-light);margin-top:6px">参考：${std}</p></div>
+      <div style="font-size:13px;color:var(--text-light)">记录次数：${records.length}次</div>
+    </div>`;
+}
+
+// ============ 6. 疫苗台账 ============
+function renderVaccine(){
+  const m = getMonthAge();
+  document.getElementById('vaccineBadge').textContent = `💉 ${m}月龄疫苗台账`;
+  renderVaccineTable();
+  renderCustomVaccine();
+  renderVaccineReminder();
+}
+
+function calcVaccineDate(month){
+  if(!state.birthDate) return '—';
+  const b = new Date(state.birthDate);
+  b.setMonth(b.getMonth()+month);
+  return b.toISOString().split('T')[0];
+}
+
+function renderVaccineTable(){
+  const today = new Date().toISOString().split('T')[0];
+  let html='';
+  DB.vaccines.forEach((v,i)=>{
+    const planDate = calcVaccineDate(v.month);
+    const rec = state.vaccineRecords[v.name]||{};
+    const status = rec.status||'pending';
+    let statusTag='';
+    if(status==='done') statusTag='<span class="tag tag-green">✓ 已完成</span>';
+    else if(status==='skip') statusTag='<span class="tag tag-pink">已跳过</span>';
+    else if(planDate<today) statusTag='<span class="tag tag-orange">待补种</span>';
+    else statusTag='<span class="tag tag-blue">待接种</span>';
+    html+=`<tr>
+      <td><b>${v.name}</b><br><span style="font-size:11px;color:var(--text-light)">${v.note}</span></td>
+      <td>${v.month}月龄</td>
+      <td>${planDate}</td>
+      <td>${statusTag}</td>
+      <td><input type="text" value="${rec.note||''}" placeholder="接种后备注" onchange="updateVaccineNote('${v.name}',this.value)" style="width:120px"></td>
+      <td>
+        <button class="action" onclick="setVaccineStatus('${v.name}','done')">完成</button>
+        <button class="action" onclick="setVaccineStatus('${v.name}','pending')">待种</button>
+      </td>
+    </tr>`;
+  });
+  document.getElementById('vaccineBody').innerHTML=html;
+}
+
+function setVaccineStatus(name,status){
+  if(!state.vaccineRecords[name]) state.vaccineRecords[name]={};
+  state.vaccineRecords[name].status=status;
+  saveState(); renderVaccineTable(); renderVaccineReminder();
+  showToast('疫苗状态已更新');
+}
+function updateVaccineNote(name,note){
+  if(!state.vaccineRecords[name]) state.vaccineRecords[name]={};
+  state.vaccineRecords[name].note=note;
+  saveState();
+}
+
+function addCustomVaccine(){
+  const name = prompt('请输入二类疫苗名称（如：手足口疫苗、轮状病毒疫苗、肺炎13价、流感疫苗等）');
+  if(!name) return;
+  const planDate = prompt('请输入计划接种日期（YYYY-MM-DD）');
+  if(!planDate) return;
+  state.customVaccines.push({name,planDate,status:'pending',note:''});
+  saveState(); renderCustomVaccine();
+  showToast('二类疫苗已添加');
+}
+
+function renderCustomVaccine(){
+  let html='';
+  if(state.customVaccines.length){
+    state.customVaccines.forEach((v,i)=>{
+      const today = new Date().toISOString().split('T')[0];
+      let tag = v.status==='done' ? '<span class="tag tag-green">✓ 已完成</span>' :
+                v.planDate<today ? '<span class="tag tag-orange">待补种</span>' : '<span class="tag tag-blue">待接种</span>';
+      html+=`<tr>
+        <td><b>${v.name}</b></td>
+        <td>${v.planDate}</td>
+        <td>${tag}</td>
+        <td><input type="text" value="${v.note}" placeholder="备注" onchange="updateCustomVaccine(${i},'note',this.value)" style="width:120px"></td>
+        <td>
+          <button class="action" onclick="updateCustomVaccine(${i},'status','done')">完成</button>
+          <button class="action" onclick="updateCustomVaccine(${i},'status','pending')">待种</button>
+          <button class="action" onclick="delCustomVaccine(${i})" style="color:#C76B6B">删除</button>
+        </td>
+      </tr>`;
+    });
+  } else {
+    html='<tr><td colspan="5" style="text-align:center;color:var(--text-light);padding:20px">暂无二类疫苗计划，点击上方"添加二类疫苗"</td></tr>';
+  }
+  document.getElementById('customVaccineBody').innerHTML=html;
+}
+
+function updateCustomVaccine(i,field,val){
+  if(state.customVaccines[i]) state.customVaccines[i][field]=val;
+  saveState(); renderCustomVaccine(); renderVaccineReminder();
+}
+function delCustomVaccine(i){
+  state.customVaccines.splice(i,1);
+  saveState(); renderCustomVaccine();
+}
+
+function renderVaccineReminder(){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const upcoming=[]; const overdue=[];
+  DB.vaccines.forEach(v=>{
+    const rec = state.vaccineRecords[v.name]||{};
+    if(rec.status==='done'||rec.status==='skip') return;
+    const planDate = new Date(calcVaccineDate(v.month));
+    const diff = Math.floor((planDate-today)/(1000*60*60*24));
+    if(diff<0) overdue.push({...v,planDate:calcVaccineDate(v.month),diff});
+    else if(diff<=30) upcoming.push({...v,planDate:calcVaccineDate(v.month),diff});
+  });
+  state.customVaccines.forEach(v=>{
+    if(v.status==='done') return;
+    const planDate = new Date(v.planDate);
+    const diff = Math.floor((planDate-today)/(1000*60*60*24));
+    if(diff<0) overdue.push({...v,planDate:v.planDate,diff});
+    else if(diff<=30) upcoming.push({...v,planDate:v.planDate,diff});
+  });
+  let html='';
+  if(overdue.length){
+    html+=`<div class="warning-box"><b>⚠️ 待补种（${overdue.length}针）</b><br>`;
+    overdue.forEach(v=>html+=`• ${v.name} - 计划日：${v.planDate}<br>`);
+    html+='</div>';
+  }
+  if(upcoming.length){
+    html+=`<div style="margin-top:8px"><b style="color:var(--accent)">📌 近期待接种（30天内）</b><br>`;
+    upcoming.forEach(v=>html+=`• ${v.name} - ${v.planDate}（${v.diff===0?'今天':v.diff+'天后'}）<br>`);
+    html+='</div>';
+  }
+  if(!html) html='<p style="color:var(--text-light);font-size:13px">近期无待接种疫苗 🎉</p>';
+  document.getElementById('vaccineReminder').innerHTML=html;
+}
+
+// ============ 每日重置 ============
+function resetDailyData(){
+  if(!confirm('确认重置今日打卡数据？（奶量记录、食物打卡将清空，疫苗和作息不变）')) return;
+  const today = todayKey();
+  state.dailyChecks[today]={};
+  state.milkRecords[today]=[];
+  saveState();
+  renderNutrition();
+  renderMilkSummary();
+  showToast('今日打卡数据已重置');
+}
+
+// ============ 导出 ============
+function exportDayRecord(){
+  const today = todayKey();
+  const a = calcAge(state.birthDate);
+  const checks = state.dailyChecks[today]||{};
+  const milk = state.milkRecords[today]||[];
+  const milkTotal = milk.reduce((s,r)=>s+r.amount,0);
+  const checkedFoods = Object.keys(checks).filter(k=>checks[k]);
+  const m = getMonthAge();
+
+  let html=`<div style="font-family:sans-serif;padding:30px;color:#4A3728">
+    <h1 style="color:#D4896A;border-bottom:2px solid #E8A87C;padding-bottom:10px">之之宝宝 · 当日喂养记录</h1>
+    <p>日期：${today} ｜ 月龄：${getMonthAgeText()} ｜ 来到地球第${a.totalDays}天</p>
+    <h3>🥗 今日食物打卡</h3><ul>`;
+  if(checkedFoods.length) checkedFoods.forEach(f=>html+=`<li>${f.replace(/_/g,'：')}</li>`);
+  else html+='<li>暂无打卡记录</li>';
+  html+=`</ul><h3>🍼 今日奶量</h3><table border="1" cellpadding="8" style="border-collapse:collapse;font-size:14px"><tr><th>时间</th><th>奶量(ml)</th></tr>`;
+  if(milk.length) milk.forEach(r=>html+=`<tr><td>${r.time}</td><td>${r.amount}ml</td></tr>`);
+  else html+='<tr><td colspan="2">暂无奶量记录</td></tr>';
+  html+=`<tr><td><b>合计</b></td><td><b>${milkTotal}ml</b></td></tr></table>
+    <h3>📊 本月龄参考</h3><p>${DB.nutritionRef[m]||DB.nutritionRef[12]}</p>
+    <p style="color:#8A7460;margin-top:20px;font-size:12px">由之之宝宝育儿工作台自动生成</p></div>`;
+
+  downloadFile(`之之宝宝_喂养记录_${today}.html`, html, 'text/html');
+  showToast('当日喂养记录已导出');
+}
+
+function exportVaccineRecord(){
+  if(!state.birthDate){ showToast('请先设置出生日期'); return; }
+  const m = getMonthAge();
+  let html=`<div style="font-family:sans-serif;padding:30px;color:#4A3728">
+    <h1 style="color:#D4896A;border-bottom:2px solid #E8A87C;padding-bottom:10px">之之宝宝 · 疫苗接种清单</h1>
+    <p>出生日期：${state.birthDate} ｜ 当前月龄：${getMonthAgeText()}</p>
+    <h3>💉 一类疫苗（免费）</h3>
+    <table border="1" cellpadding="8" style="border-collapse:collapse;font-size:13px;width:100%">
+    <tr style="background:#F5EDE0"><th>疫苗名称</th><th>月龄</th><th>计划日期</th><th>状态</th><th>备注</th></tr>`;
+  DB.vaccines.forEach(v=>{
+    const rec = state.vaccineRecords[v.name]||{};
+    const status = rec.status==='done'?'✓已完成':rec.status==='skip'?'已跳过':'待接种';
+    html+=`<tr><td>${v.name}<br><span style="font-size:11px;color:#8A7460">${v.note}</span></td><td>${v.month}月龄</td><td>${calcVaccineDate(v.month)}</td><td>${status}</td><td>${rec.note||''}</td></tr>`;
+  });
+  html+='</table>';
+  if(state.customVaccines.length){
+    html+='<h3>📌 二类疫苗（自费）</h3><table border="1" cellpadding="8" style="border-collapse:collapse;font-size:13px;width:100%"><tr style="background:#F5EDE0"><th>疫苗名称</th><th>计划日期</th><th>状态</th><th>备注</th></tr>';
+    state.customVaccines.forEach(v=>{
+      html+=`<tr><td>${v.name}</td><td>${v.planDate}</td><td>${v.status==='done'?'✓已完成':'待接种'}</td><td>${v.note}</td></tr>`;
+    });
+    html+='</table>';
+  }
+  html+=`<p style="color:#8A7460;margin-top:20px;font-size:12px">由之之宝宝育儿工作台自动生成 · ${new Date().toLocaleDateString('zh-CN')}</p></div>`;
+  downloadFile(`之之宝宝_疫苗清单_${todayKey()}.html`, html, 'text/html');
+  showToast('疫苗清单已导出');
+}
+
+function downloadFile(filename, content, type){
+  const blob = new Blob([content], {type:type+';charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ============ Toast ============
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+// ============ 启动 ============
+loadState();
+if(state.birthDate){
+  document.getElementById('initModal').style.display='none';
+  refreshAll();
+} else {
+  document.getElementById('birthInput').value = '';
+}
+
+// 注册 Service Worker（离线缓存）
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('service-worker.js').then(()=>{
+    console.log('✓ 离线缓存已启用');
+  }).catch(err=>console.log('SW 注册失败:',err));
+}
+</script>
+</body>
+</html>
