@@ -1,0 +1,20 @@
+{
+  "name": "之之宝宝 · 专属育儿工作台",
+  "short_name": "之之宝宝",
+  "description": "0-12月龄宝宝专属育儿工作台：辅食菜谱、早教游戏、育儿知识、营养打卡、喝奶作息、疫苗台账，月龄自动匹配同步更新。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FBF7F0",
+  "theme_color": "#E8A87C",
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "categories": ["lifestyle", "health", "parenting"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
